@@ -18,7 +18,7 @@ class Telegram implements NotifierInterface
      * @return array
      * @throws ApiCallException|CurlException|JsonException|NotificationException
      */
-    public function notify(string $message): array
+    public function notify(string $message, bool $silent): array
     {
         $apiKey = getenv('TELEGRAM_BOT_API_KEY');
         $telegramUserId = getenv('TELEGRAM_USER_ID');
@@ -26,6 +26,7 @@ class Telegram implements NotifierInterface
         $body = http_build_query([
             'text' => $message,
             'chat_id' => $telegramUserId,
+            'disable_notification' => $silent
         ]);
 
         $curlOptions = [

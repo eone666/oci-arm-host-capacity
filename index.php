@@ -52,7 +52,7 @@ if (getenv('CACHE_AVAILABILITY_DOMAINS')) {
 if (getenv('TOO_MANY_REQUESTS_TIME_WAIT')) {
     $api->setWaiter(new TooManyRequestsWaiter((int) getenv('TOO_MANY_REQUESTS_TIME_WAIT')));
 }
-$notifier = (function (): \Hitrov\Interfaces\NotifierInterface {
+$notifier = (function (): \Hitrov\Interfaces\NotifierInterface{
     /*
      * if you have own https://core.telegram.org/bots
      * and set TELEGRAM_BOT_API_KEY and your TELEGRAM_USER_ID in .env
@@ -83,7 +83,7 @@ if (!empty($config->availabilityDomains)) {
     if (is_array($config->availabilityDomains)) {
         $availabilityDomains = $config->availabilityDomains;
     } else {
-        $availabilityDomains = [ $config->availabilityDomains ];
+        $availabilityDomains = [$config->availabilityDomains];
     }
 } else {
     $availabilityDomains = $api->getAvailabilityDomains($config);
@@ -93,12 +93,13 @@ foreach ($availabilityDomains as $availabilityDomainEntity) {
     $availabilityDomain = is_array($availabilityDomainEntity) ? $availabilityDomainEntity['name'] : $availabilityDomainEntity;
     try {
         $instanceDetails = $api->createInstance($config, $shape, getenv('OCI_SSH_PUBLIC_KEY'), $availabilityDomain);
-    } catch(ApiCallException $e) {
+    } catch (ApiCallException $e) {
         $message = $e->getMessage();
         echo "$message\n";
-//            if ($notifier->isSupported()) {
-//                $notifier->notify($message);
-//            }
+
+        if ($notifier->isSupported()) {
+            $notifier->notify($message, true);
+        }
 
         if (
             $e->getCode() === 500 &&
@@ -118,7 +119,7 @@ foreach ($availabilityDomains as $availabilityDomainEntity) {
     $message = json_encode($instanceDetails, JSON_PRETTY_PRINT);
     echo "$message\n";
     if ($notifier->isSupported()) {
-        $notifier->notify($message);
+        $notifier->notify($message, false);
     }
 
     return;
